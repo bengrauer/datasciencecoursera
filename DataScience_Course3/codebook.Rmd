@@ -1,0 +1,126 @@
+---
+title: "Code Book"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This code book was designed to explain the code, transformations steps, and variables associated with the data cleanup. 
+
+### 1. FILE READING
+During this phase of the script we are reading in all the files necessary into data.table variables.
+
+Variables: 
+
+* *activity_labels* - houses the file contents for the activities.  There are 6 different activities.
+* *features* - houses the features and codes.  There are 561 different measurements from the phone (in x,y,z co-ordinates)
+* *test_subject_test* - store contents of file "subject_test.txt".  This contains all the volunteers / subjects numbers.  Test split.
+* *test_X_test* - store contents of file "X_test.txt". This contains all the detailed measurements / features. Test split.
+* *test_Y_test* - store contents of file "Y_test.txt". This contains all the activities - activity 1-6.  Test split.
+* *train_subject_train* - store contents of file "subject_train.txt". This contains all the volunteers / subjects numbers.  Train split.
+* *train_X_train* - store contents of file "X_train.txt". This contains all the detailed measurements / features. Train split.
+* *train_Y_train* - store contents of file "Y_train.txt". This contains all the activities - activity 1-6.  Train split.
+
+
+### 2. DATA EXPLORING
+In this section the script is performing head, tail, and table functions on the data to determine the codes I was working with.  "X" is the features and "Y" are the activity levels.
+
+
+### 3. RENAMING COLUMNS
+In this area of the script I add rename the "Vx" headers to something more readable.  Including the activities, features, and the volunteers numbers (subjects) of the expirement
+
+These lines below pivot the feature description contents data, to in turn, rename all of the 561 column header names to the feature description.
+
+```{r pivotheadernames, eval=FALSE}
+ setnames(test_X_test, old=colnames(test_X_test), new = as.vector(t(features$feature.desc)))
+ setnames(train_X_train, old=colnames(train_X_train), new = as.vector(t(features$feature.desc)))
+```
+
+
+### 4. MERGING THE DATA
+In this section I am checking the number of rows in the subjects/volunteer data set before I merge.  
+
+```{r merge_checkrows, eval=FALSE}
+  nrow(test_subject_test) # 2947 - which volunteer
+  #nrow(features) # 561 - descriptions of features - DONT NEED THIS SINCE WE RE-LABELED COLUMNS ABOVE
+  nrow(test_X_test) # 2947 - all the detailed measurements / features
+  nrow(test_Y_test) # 2947 - all the activities (1/6)
+```
+
+The two data tables/variables are named "test_Y_test" and "train_Y_train", and I am merging the volunteer/subject data set with the activity description data set.  I want to see the description in my dataset for easier reference.
+```{r merge_joinactivities, eval=FALSE}
+  # NEED TO JOIN THE ACTIVITIES - so we can have the activity name in the data set
+  head(test_Y_test)
+  test_activity_set = merge(x = test_Y_test, y=activity_labels, by = "activity.num")
+  train_activity_set = merge(x = train_Y_train, y=activity_labels, by = "activity.num")
+```
+
+Here I perform a column bind operation on all three data sets: the subjects, the activites, and the features
+```{r merge_cbind_SubjectActivityFeature, eval=FALSE}
+  # Need to MERGE all three together first - volunteers w/features.
+  full_test_set <- cbind(test_subject_test, test_activity_set, test_X_test)
+  # head(full_test_set, 2)
+  
+  full_train_set <- cbind(train_subject_train, train_activity_set, train_X_train)
+  # head(full_train_set, 2)
+```
+
+Here I merge the test and train data sets by a row bind - esentially stacking the data back into one data set/variable named "full_set"
+```{r merge_rbind_testAndtrain, eval=FALSE}
+  # row bind back into a single set
+  full_set <- rbind(full_test_set, full_train_set)
+  # head(full_set, 1)  
+```
+
+
+### 5. EXTRACT ONLY NEEDED DATA
+This section is mainly designed to do two things.  1 - Take the mean + std dev. columns.  2 - Take all 30+ feature and melt them into a single row for easy grouping later.
+
+
+This code here grabs the numeric index of only the columns I want to keep.  It assigns to a vector variable colsToKeep.  It also increments by 3 to keep the exisitng columns "volunteer", "activity.num", "activity.desc", and then add the mean + std dev columns
+
+*fullset_stdAndmean* - This variable contains the full set of columns subjects + activities + long list of columns/features that only have the std and mean columns included.
+```{r extract_colsToKepp, eval=FALSE}
+  # volunteer|activity.num|activity.desc
+  # this is kind of quirky here, but we are taking the first three important columns (volunteer|activity.num|activity.desc), + everything esel with std and mean in the name
+  #  I had to do this becuase I didn't realize there were duplicate names in the features that was throwing an error with grep.
+  #  so intead pulling the columns values by #, and then sub-set from there
+  
+  colsToKeep <- grep("mean|std", features$feature.desc) # grab the named column
+  colsToKeep <- c(1, 2,3, colsToKeep +3)  # grab important 1,2,3 + std/mean (with proper offsets)
+  fullset_stdAndmean <- full_set[, colsToKeep]
+```
+
+
+This code area the data set to pivot the data for easier grouping.  The temporary csv file was used to verify the counts/checks of the data in Excel.  
+
+*fullset_melted* - This variable keeps the three main columns "volunteer", "activity.num", "activity.desc", and then puts the feature names in a single column, along with the variable amounts
+
+```{r extract_MeltFullSet, eval=FALSE}
+  fullset_melted <- melt(fullset_stdAndmean, id=c("volunteer","activity.num","activity.desc"))
+  # write.csv(as.data.table(benMelt), file = "ben_melt.csv", row.names = FALSE)
+```
+  
+
+### 6. WRITING THE TIDY DATA
+This section simply writes the output of the final tidy data set (non grouped)
+
+```{r write_TidyDataSet, eval=FALSE}
+    write.table(as.data.table(fullset_melted), file = "TidyDataSet_Flat.txt", row.names = FALSE)
+```
+
+### 7. GROUPING DATA FOR AVERAGE
+This section of the script outputs a tidy date set with the average of each variable for each activity and each subject.
+```{r write_TidyGrouping, eval=FALSE}
+  grouped_result <-
+    fullset_melted %>%
+    group_by(volunteer, activity.num, activity.desc, variable) %>%
+    summarize(avg_variable_value = mean(value)
+    ) %>%
+    arrange(volunteer, activity.num)
+
+  write.table(as.data.table(grouped_result), file = "TidyDataSet_GrpRslt.txt", row.names = FALSE)
+```
+
