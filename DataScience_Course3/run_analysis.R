@@ -180,6 +180,9 @@ library(reshape2)
   head(fullset_melted)
   tail(fullset_melted)
 
+  # Added last minute - Rename the "variable" to a measurement_type, because the measurement type is the conceptual single "variable" for my short tidy data set
+  setnames(fullset_melted, "variable","measurement_type")
+  
 # END EXTRACTED DATA
 # ========================
 
@@ -201,10 +204,12 @@ library(reshape2)
   # need to show the average by each variable and each subject (volunteer) 
   grouped_result <-
     fullset_melted %>%
-    group_by(volunteer, activity.num, activity.desc, variable) %>%
+    group_by(volunteer, activity.num, activity.desc, measurement_type) %>%
     summarize(avg_variable_value = mean(value)
     ) %>%
     arrange(volunteer, activity.num)
+  
+  
   
   head(grouped_result, 20)
   

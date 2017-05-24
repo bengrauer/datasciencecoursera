@@ -1,4 +1,4 @@
-"volunteer" "activity.num" "activity.desc" "variable" "avg_variable_value"
+"volunteer" "activity.num" "activity.desc" "measurement_type" "avg_variable_value"
 1 1 "WALKING" "tBodyAcc-mean()-X" 0.265696920582133
 1 1 "WALKING" "tBodyAcc-mean()-Y" -0.0182981725176081
 1 1 "WALKING" "tBodyAcc-mean()-Z" -0.10784573454611

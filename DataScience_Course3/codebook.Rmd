@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This code book was designed to explain the code, transformations steps, and variables associated with the data cleanup. 
+Please keep in mind that for this exercise I chose a SHORT tidy data set, as opposed to a long/wide data set. The "measurement_type" is a single variable (which is a range of measurement types - similiar to the types of excercises 1-6), and the value makes each row a unique observation. Having a SQL back-ground, if I were to import this data into a database in wide format (single column for each feature - 60+ columns) to run analytics against, I would spend days coding to bring the data back together just to run simple aggregate/analytic queries with. Thus the reasoning for my direction.
 
 ### 1. FILE READING
 During this phase of the script we are reading in all the files necessary into data.table variables.
@@ -94,13 +94,16 @@ This code here grabs the numeric index of only the columns I want to keep.  It a
 ```
 
 
-This code area the data set to pivot the data for easier grouping.  The temporary csv file was used to verify the counts/checks of the data in Excel.  
+This code area the data set to pivot the data for easier grouping.  Also the "variable", which is the feature has been renamed to "measurement_type", as my single variable per column (tidy requirement) is a logical grouping of the measurements.  The temporary csv file was used to verify the counts/checks of the data in Excel.  
 
 *fullset_melted* - This variable keeps the three main columns "volunteer", "activity.num", "activity.desc", and then puts the feature names in a single column, along with the variable amounts
 
 ```{r extract_MeltFullSet, eval=FALSE}
   fullset_melted <- melt(fullset_stdAndmean, id=c("volunteer","activity.num","activity.desc"))
   # write.csv(as.data.table(benMelt), file = "ben_melt.csv", row.names = FALSE)
+
+  # Added last minute - Rename the "variable" to a measurement_type, because the measurement type is the conceptual single "variable" for my short tidy data set
+  setnames(fullset_melted, "variable","measurement_type")
 ```
   
 
@@ -116,7 +119,7 @@ This section of the script outputs a tidy date set with the average of each vari
 ```{r write_TidyGrouping, eval=FALSE}
   grouped_result <-
     fullset_melted %>%
-    group_by(volunteer, activity.num, activity.desc, variable) %>%
+    group_by(volunteer, activity.num, activity.desc, measurement_type) %>%
     summarize(avg_variable_value = mean(value)
     ) %>%
     arrange(volunteer, activity.num)
