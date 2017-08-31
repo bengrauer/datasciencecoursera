@@ -19,9 +19,9 @@ The second topic I would like to explore is what categories of loans are most pr
 The fields "purpose", "int_rate", "term", and there may be others not yet identified.
 
 
-## Step 6 - Existing literature about the data set.
+### Step 6 - Existing literature about the data set.
 I have found alternative evidence of prior analysis of the data set.
 - [Lending Club Analysis](http://www.datasciencecentral.com/profiles/blogs/analysis-of-lending-club-s-data)
 
-## Step 7 - Develop a hypothesis
+### Step 7 - Develop a hypothesis
 I hypothesize that the majority of defaults will be within the higher interest rate bracket along with higher rate "dti" (debt to income ratios) measures.
