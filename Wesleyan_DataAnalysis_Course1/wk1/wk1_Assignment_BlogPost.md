@@ -1,10 +1,10 @@
 ## Coursera Course - Data Analysis and Interpretation (Wesleyan University)
 ## Course 1 - Week 1 - Assignment - Blog Post
-Please note that instead of signing up for a Tumblr account, I have chosen to leverage an existing account on Github.  The reason for this is I didn't want to sign up for another social media site  when I have github already setup and established.  I am re-creating the blog post in md (mark down), and can utilize juypter notebooks to show-case any code examples later with ease.
+Please note that instead of signing up for a Tumblr account, I have chosen to leverage an already existing account on Github to consolidate work and platforms.  I am re-creating this blog post in md (mark down), and the rest of the blog posts will utilize juypter notebooks to show-case any code examples.
 
 
 ### Step 1 - Choose a Data Set
-The data set I have chosen is a properly scrubbed and public lending/loan data set.  It contains good financial/loan funding information to work with, which interests me from a financial angle of research.  I have been eager to dive into this data set to see what trends or insights it may produce, more specifically with default or profitibility patterns.
+The data set I have chosen is a properly scrubbed and public lending club loan data set.  It contains good financial/loan funding information to work with, which interests me from a financial angle of research.  I have been eager to dive into this data set to see what trends or insights it may produce, more specifically with default or profitibility patterns.
 
 ### Step 2 - Identify a specific topic of interest
 The topic of interest I have chosen to study is how defaulted loans may correlate to other specific loan elements. I.E. can I identify or segment any high-risk groups from the data?
